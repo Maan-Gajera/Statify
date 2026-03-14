@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Statify - Data Quality</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --neon-cyan: #00f2ff;
+      --glass: rgba(255, 255, 255, 0.03);
+      --glass-border: rgba(255, 255, 255, 0.1);
+    }
+
+    body {
+      background: radial-gradient(circle at top right, #1a1c2e, #05070a);
+      color: white;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      min-height: 100vh;
+    }
+
+    .glass-card {
+      background: var(--glass);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--glass-border);
+      border-radius: 24px;
+    }
+
+    /* Navigation Pills */
+    .nav-pill {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--glass-border);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .nav-pill.active {
+      border-color: var(--neon-cyan);
+      background: rgba(0, 242, 255, 0.1);
+      color: var(--neon-cyan);
+      box-shadow: 0 0 15px rgba(0, 242, 255, 0.2);
+    }
+
+    .nav-pill:hover:not(.active) {
+      background: rgba(255, 255, 255, 0.1);
+      transform: translateY(-2px);
+    }
+
+    /* Table Scrollbar */
+    .custom-scrollbar::-webkit-scrollbar {
+      height: 8px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: var(--glass-border);
+      border-radius: 10px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: var(--neon-cyan);
+    }
+  </style>
+</head>
+<body class="pb-12">
+
+  <header class="border-b border-white/10 bg-black/20 backdrop-blur-md sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+      <h1 class="text-xl font-bold flex items-center gap-3">
+        <i class="fas fa-microscope text-cyan-400"></i>
+        Dataset Quality
+      </h1>
+      <a href="/" class="text-sm text-gray-400 hover:text-cyan-400 transition">← Upload New File</a>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto mt-8 px-6">
+    
+    <div class="flex items-center gap-3 mb-8">
+      <div class="p-2 bg-cyan-500/10 rounded-lg">
+        <i class="fas fa-database text-cyan-400"></i>
+      </div>
+      <h2 class="text-lg font-semibold text-gray-200">Analyzing: <span class="text-cyan-300">{{ filename }}</span></h2>
+    </div>
+
+    <div class="flex flex-wrap justify-center gap-3 mb-10">
+      <a href="{{ url_for('dataset_preview') }}" class="nav-pill px-6 py-2 rounded-full text-sm font-medium text-gray-400 flex items-center gap-2">
+        <i class="fas fa-eye"></i> Overview
+      </a>
+      <a href="{{ url_for('data_quality') }}" class="nav-pill active px-6 py-2 rounded-full text-sm font-medium flex items-center gap-2">
+        <i class="fas fa-shield-alt"></i> Data Quality
+      </a>
+      <a href="{{ url_for('preprocess') }}" class="nav-pill px-6 py-2 rounded-full text-sm font-medium text-gray-400 flex items-center gap-2 hover:text-white">
+        <i class="fas fa-tools"></i> Preprocess
+      </a>
+      <a href="{{ url_for('visualize') }}" class="nav-pill px-6 py-2 rounded-full text-sm font-medium text-gray-400 flex items-center gap-2 hover:text-white">
+        <i class="fas fa-chart-pie"></i> Visualize
+      </a>
+      <a href="{{ url_for('ml_models') }}" class="nav-pill px-6 py-2 rounded-full text-sm font-medium text-gray-400 flex items-center gap-2 hover:text-white">
+        <i class="fas fa-robot"></i> ML Models
+      </a>
+    </div>
+
+    <div class="glass-card overflow-hidden shadow-2xl border-white/5">
+      <div class="p-6 border-b border-white/5 flex justify-between items-center bg-white/[0.02]">
+        <h3 class="font-bold text-gray-200 flex items-center gap-2">
+          <i class="fas fa-list-check text-cyan-400"></i>
+          Column Statistics
+        </h3>
+        <span class="text-[10px] uppercase tracking-widest text-gray-500 font-bold">Auto-Generated Report</span>
+      </div>
+
+      <div class="custom-scrollbar overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="bg-black/20">
+              <th class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-cyan-400 border-b border-white/10">Column</th>
+              <th class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-400 border-b border-white/10">Missing</th>
+              <th class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-400 border-b border-white/10">Unique</th>
+              <th class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-400 border-b border-white/10">Mean</th>
+              <th class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-400 border-b border-white/10">Mode</th>
+              <th class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-400 border-b border-white/10">SD</th>
+              <th class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-400 border-b border-white/10">Q1</th>
+              <th class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-400 border-b border-white/10">Q3</th>
+              <th class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-400 border-b border-white/10">IQR</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-white/5">
+            {% for col, stats in quality_report.items() %}
+              <tr class="hover:bg-white/[0.04] transition-colors">
+                <td class="px-6 py-4 text-sm font-bold text-white">{{ col }}</td>
+                <td class="px-6 py-4 text-sm text-gray-300">{{ stats.missing }}</td>
+                <td class="px-6 py-4 text-sm text-gray-300">{{ stats.unique }}</td>
+                <td class="px-6 py-4 text-sm text-gray-300">{{ stats.mean }}</td>
+                <td class="px-6 py-4 text-sm text-gray-300">{{ stats.mode }}</td>
+                <td class="px-6 py-4 text-sm text-gray-300">{{ stats.sd }}</td>
+                <td class="px-6 py-4 text-sm text-gray-300">{{ stats.q1 }}</td>
+                <td class="px-6 py-4 text-sm text-gray-300">{{ stats.q3 }}</td>
+                <td class="px-6 py-4 text-sm text-gray-300">{{ stats.iqr }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div class="glass-card p-6 border-cyan-500/20 flex items-center gap-4">
+        <div class="w-12 h-12 bg-cyan-500/10 rounded-xl flex items-center justify-center text-cyan-400">
+          <i class="fas fa-check-double"></i>
+        </div>
+        <div>
+          <p class="text-[10px] uppercase font-bold text-gray-500">Data Integrity</p>
+          <p class="text-sm font-semibold">Validation Complete</p>
+        </div>
+      </div>
+      </div>
+
+  </main>
+
+</body>
+</html>

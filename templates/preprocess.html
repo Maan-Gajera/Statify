@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Statify - Preprocessing</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --neon-cyan: #00f2ff;
+      --glass: rgba(255, 255, 255, 0.03);
+      --glass-border: rgba(255, 255, 255, 0.1);
+    }
+
+    body {
+      background: radial-gradient(circle at top right, #1a1c2e, #05070a);
+      color: white;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      min-height: 100vh;
+    }
+
+    .glass-card {
+      background: var(--glass);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--glass-border);
+      border-radius: 24px;
+      transition: all 0.3s ease;
+    }
+
+    .nav-pill {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--glass-border);
+      transition: all 0.3s ease;
+    }
+
+    .nav-pill.active {
+      border-color: var(--neon-cyan);
+      background: rgba(0, 242, 255, 0.1);
+      color: var(--neon-cyan);
+      box-shadow: 0 0 15px rgba(0, 242, 255, 0.2);
+    }
+
+    select, input[type="text"] {
+      background-color: #0f172a;
+      border: 1px solid var(--glass-border) !important;
+      color: white !important;
+      outline: none !important;
+    }
+
+    select:focus, input[type="text"]:focus {
+      border-color: var(--neon-cyan) !important;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: var(--glass-border);
+      border-radius: 10px;
+    }
+  </style>
+</head>
+<body class="pb-12">
+
+  <header class="border-b border-white/10 bg-black/20 backdrop-blur-md sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+      <h1 class="text-xl font-bold flex items-center gap-3">
+        <i class="fas fa-wand-magic-sparkles text-cyan-400"></i>
+        Dataset Preprocessing
+      </h1>
+      <a href="/" class="text-sm text-gray-400 hover:text-cyan-400 transition">← Upload New File</a>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto mt-8 px-6">
+    
+    <div class="flex items-center gap-3 mb-8">
+      <div class="p-2 bg-blue-500/10 rounded-lg">
+        <i class="fas fa-file-code text-blue-400"></i>
+      </div>
+      <h2 class="text-lg font-semibold text-gray-200">Processing: <span class="text-cyan-300">{{ filename }}</span></h2>
+    </div>
+
+    <div class="flex flex-wrap justify-center gap-3 mb-10">
+      <a href="{{ url_for('dataset_preview') }}" class="nav-pill px-6 py-2 rounded-full text-sm font-medium text-gray-400 flex items-center gap-2">
+        <i class="fas fa-eye"></i> Overview
+      </a>
+      <a href="{{ url_for('data_quality') }}" class="nav-pill px-6 py-2 rounded-full text-sm font-medium text-gray-400 flex items-center gap-2 hover:text-white">
+        <i class="fas fa-shield-alt"></i> Data Quality
+      </a>
+      <a href="{{ url_for('preprocess') }}" class="nav-pill active px-6 py-2 rounded-full text-sm font-medium flex items-center gap-2">
+        <i class="fas fa-tools"></i> Preprocess
+      </a>
+      <a href="{{ url_for('visualize') }}" class="nav-pill px-6 py-2 rounded-full text-sm font-medium text-gray-400 flex items-center gap-2 hover:text-white">
+        <i class="fas fa-chart-pie"></i> Visualize
+      </a>
+      <a href="{{ url_for('ml_models') }}" class="nav-pill px-6 py-2 rounded-full text-sm font-medium text-gray-400 flex items-center gap-2 hover:text-white">
+        <i class="fas fa-robot"></i> ML Models
+      </a>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+      
+      <div class="glass-card p-6 border-yellow-500/20">
+        <div class="flex items-center gap-4 mb-6">
+          <div class="w-12 h-12 bg-yellow-500/10 rounded-xl flex items-center justify-center text-yellow-400">
+            <i class="fas fa-exclamation-triangle"></i>
+          </div>
+          <h3 class="font-bold text-gray-200">Missing Values</h3>
+        </div>
+        {% if missing_info and missing_info.values()|sum > 0 %}
+          <div class="space-y-2 max-h-40 overflow-y-auto custom-scrollbar pr-2">
+            {% for col, count in missing_info.items() %}
+              {% if count > 0 %}
+                <div class="flex justify-between p-3 bg-white/5 rounded-xl border border-white/5">
+                  <span class="text-sm text-gray-300 font-medium">{{ col }}</span>
+                  <span class="text-sm font-bold text-yellow-400">{{ count }}</span>
+                </div>
+              {% endif %}
+            {% endfor %}
+          </div>
+        {% else %}
+          <p class="text-sm text-green-400 font-medium flex items-center gap-2">
+            <i class="fas fa-check-circle"></i> No missing values detected.
+          </p>
+        {% endif %}
+      </div>
+      
+      <div class="glass-card p-6 border-red-500/20 flex flex-col justify-between">
+        <div>
+          <div class="flex items-center gap-4 mb-6">
+            <div class="w-12 h-12 bg-red-500/10 rounded-xl flex items-center justify-center text-red-400">
+              <i class="fas fa-copy"></i>
+            </div>
+            <h3 class="font-bold text-gray-200">Duplicate Rows</h3>
+          </div>
+          {% if duplicate_count > 0 %}
+            <p class="text-sm text-gray-400 mb-6">Detected <span class="text-red-400 font-bold">{{ duplicate_count }}</span> redundant entries.</p>
+          {% else %}
+            <p class="text-sm text-green-400 font-medium flex items-center gap-2">
+              <i class="fas fa-check-circle"></i> No duplicate rows found.
+            </p>
+          {% endif %}
+        </div>
+        
+        {% if duplicate_count > 0 %}
+          <form action="{{ url_for('preprocess_action') }}" method="post">
+            <input type="hidden" name="action" value="drop_duplicates">
+            <button type="submit" class="w-full py-3 bg-red-600/20 hover:bg-red-600 border border-red-500/50 text-red-100 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2">
+              <i class="fas fa-trash-alt"></i> Clean Duplicates
+            </button>
+          </form>
+        {% endif %}
+      </div>
+    </div>
+
+    <h3 class="text-lg font-bold text-gray-300 mb-6 flex items-center gap-2">
+      <i class="fas fa-bolt text-cyan-400"></i> Preprocessing Actions
+    </h3>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      
+      <div class="glass-card p-6 flex flex-col">
+        <h4 class="text-sm font-bold text-blue-400 uppercase tracking-widest mb-6">Imputation</h4>
+        <form action="{{ url_for('preprocess_action') }}" method="post" class="flex flex-col flex-grow">
+          <input type="hidden" name="action" value="fill_missing">
+          <div class="mb-6">
+            <label class="block text-xs text-gray-500 font-bold mb-2 uppercase">Method</label>
+            <select name="fill_method" class="w-full p-3 rounded-xl text-sm">
+              <option value="drop_rows">Drop Rows</option>
+              <option value="mean">Mean (Numeric Only)</option>
+              <option value="median">Median (Numeric Only)</option>
+              <option value="mode">Mode (Categorical/Frequent)</option>
+            </select>
+          </div>
+          <button type="submit" class="mt-auto w-full py-3 bg-blue-600 hover:bg-blue-500 rounded-xl font-bold text-sm transition shadow-lg shadow-blue-900/20">
+            Apply Imputation
+          </button>
+        </form>
+      </div>
+
+      <div class="glass-card p-6 flex flex-col">
+        <h4 class="text-sm font-bold text-red-400 uppercase tracking-widest mb-6">Feature Removal</h4>
+        <form action="{{ url_for('preprocess_action') }}" method="post" class="flex flex-col flex-grow">
+          <input type="hidden" name="action" value="drop_columns">
+          <div class="mb-6">
+            <label class="block text-xs text-gray-500 font-bold mb-2 uppercase">Select Columns</label>
+            <select name="drop_columns" multiple class="w-full p-3 rounded-xl text-sm h-32 overflow-y-auto custom-scrollbar">
+              {% for col in columns %}
+                <option value="{{ col }}" class="py-1">{{ col }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <button type="submit" class="mt-auto w-full py-3 bg-red-600 hover:bg-red-500 rounded-xl font-bold text-sm transition shadow-lg shadow-red-900/20">
+            Drop Selected
+          </button>
+        </form>
+      </div>
+
+      <div class="glass-card p-6 flex flex-col">
+        <h4 class="text-sm font-bold text-green-400 uppercase tracking-widest mb-6">Rename</h4>
+        <form action="{{ url_for('preprocess_action') }}" method="post" class="flex flex-col flex-grow">
+          <input type="hidden" name="action" value="rename_column">
+          <div class="space-y-4 mb-6">
+            <div>
+              <label class="block text-xs text-gray-500 font-bold mb-2 uppercase">Original Name</label>
+              <select name="rename_column" class="w-full p-3 rounded-xl text-sm">
+                {% for col in columns %}
+                  <option value="{{ col }}">{{ col }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs text-gray-500 font-bold mb-2 uppercase">New Name</label>
+              <input type="text" name="new_name" placeholder="Enter alias..." class="w-full p-3 rounded-xl text-sm">
+            </div>
+          </div>
+          <button type="submit" class="mt-auto w-full py-3 bg-green-600 hover:bg-green-500 rounded-xl font-bold text-sm transition shadow-lg shadow-green-900/20">
+            Rename Feature
+          </button>
+        </form>
+      </div>
+
+    </div>
+  </main>
+
+</body>
+</html>

@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Statify - Welcome</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --neon-cyan: #00f2ff;
+      --glass: rgba(255, 255, 255, 0.03);
+      --glass-border: rgba(255, 255, 255, 0.1);
+    }
+
+    body {
+      background: radial-gradient(circle at top right, #1a1c2e, #05070a);
+      color: white;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      min-height: 100vh;
+    }
+
+    .glass-card {
+      background: var(--glass);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--glass-border);
+      border-radius: 24px;
+    }
+
+    .nav-blur {
+      background: rgba(5, 7, 10, 0.6);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--glass-border);
+    }
+
+    /* Tab switcher */
+    .tab-btn {
+      transition: all 0.3s ease;
+      border-bottom: 2px solid transparent;
+      color: #6b7280;
+    }
+    .tab-btn.active {
+      color: var(--neon-cyan);
+      border-bottom-color: var(--neon-cyan);
+    }
+
+    /* Input fields */
+    .auth-input {
+      background: rgba(15, 23, 42, 0.8) !important;
+      border: 1px solid var(--glass-border) !important;
+      color: white !important;
+      outline: none !important;
+      transition: border-color 0.3s ease;
+      width: 100%;
+      padding: 14px 16px 14px 44px;
+      border-radius: 12px;
+      font-size: 0.875rem;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    .auth-input:focus {
+      border-color: var(--neon-cyan) !important;
+      box-shadow: 0 0 0 3px rgba(0, 242, 255, 0.08);
+    }
+    .auth-input::placeholder { color: #4b5563; }
+
+    /* Neon button */
+    .btn-neon {
+      background: linear-gradient(90deg, #00f2ff, #0072ff);
+      box-shadow: 0 0 15px rgba(0, 242, 255, 0.3);
+      border: none;
+      transition: all 0.3s ease;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    .btn-neon:hover {
+      box-shadow: 0 0 25px rgba(0, 242, 255, 0.6);
+      transform: scale(1.02);
+    }
+
+    /* Glow blob */
+    .glow-blob {
+      position: absolute;
+      width: 400px;
+      height: 400px;
+      background: rgba(0, 242, 255, 0.06);
+      border-radius: 50%;
+      filter: blur(80px);
+      pointer-events: none;
+    }
+
+    /* Form panel animation */
+    .form-panel {
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+    .form-panel.active { display: block; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Alert */
+    .alert {
+      padding: 12px 16px;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      display: none;
+      margin-bottom: 16px;
+    }
+    .alert.error   { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.4); color: #fca5a5; }
+    .alert.success { background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.4); color: #86efac; }
+    .alert.show    { display: flex; align-items: center; gap: 8px; }
+
+    /* Password strength bar */
+    .strength-bar {
+      height: 3px;
+      border-radius: 2px;
+      transition: all 0.3s ease;
+      background: #1e293b;
+    }
+    .strength-bar.weak   { background: #ef4444; width: 33%; }
+    .strength-bar.medium { background: #f59e0b; width: 66%; }
+    .strength-bar.strong { background: #22c55e; width: 100%; }
+
+    /* Toggle password visibility */
+    .eye-btn {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #6b7280;
+      cursor: pointer;
+      transition: color 0.2s;
+      background: none;
+      border: none;
+      padding: 0;
+    }
+    .eye-btn:hover { color: var(--neon-cyan); }
+
+    /* Divider */
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: #374151;
+      font-size: 0.75rem;
+    }
+    .divider::before, .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--glass-border);
+    }
+  </style>
+</head>
+<body class="overflow-x-hidden">
+
+  <!-- Navbar -->
+  <nav class="nav-blur sticky top-0 z-50 py-4 px-8">
+    <div class="max-w-7xl mx-auto flex justify-between items-center">
+      <a class="flex items-center gap-3" href="#">
+        <div class="w-10 h-10 border-2 border-[#00eaff] rounded-xl flex items-center justify-center font-bold text-[#00eaff] shadow-[0_0_10px_rgba(0,234,255,0.3)]">
+          S
+        </div>
+        <span class="text-2xl font-bold tracking-tight text-white">Statify</span>
+      </a>
+    </div>
+  </nav>
+
+  <!-- Background glow -->
+  <div class="glow-blob" style="top: -100px; right: -100px;"></div>
+  <div class="glow-blob" style="bottom: -100px; left: -100px; background: rgba(0,114,255,0.05);"></div>
+
+  <!-- Main content -->
+  <div class="min-h-[calc(100vh-72px)] flex items-center justify-center px-4 py-12">
+    <div class="w-full max-w-md">
+
+      <!-- Logo + heading -->
+      <div class="text-center mb-8">
+        <h1 class="text-4xl font-extrabold mb-2 bg-clip-text text-transparent bg-gradient-to-r from-white via-cyan-200 to-blue-400">
+          Welcome Back
+        </h1>
+        <p class="text-gray-500 text-sm">Sign in to your Statify account to continue</p>
+      </div>
+
+      <!-- Card -->
+      <div class="glass-card p-8">
+
+        <!-- Tab Switcher -->
+        <div class="flex gap-0 mb-8 border-b border-white/5">
+          <button onclick="switchTab('login')" id="tab-login"
+                  class="tab-btn active flex-1 pb-3 text-sm font-bold uppercase tracking-widest">
+            Login
+          </button>
+          <button onclick="switchTab('signup')" id="tab-signup"
+                  class="tab-btn flex-1 pb-3 text-sm font-bold uppercase tracking-widest">
+            Sign Up
+          </button>
+          <button onclick="switchTab('forgot')" id="tab-forgot"
+                  class="tab-btn flex-1 pb-3 text-sm font-bold uppercase tracking-widest">
+            Forgot
+          </button>
+        </div>
+
+        <!-- Alert box (shared) -->
+        <div id="alert-box" class="alert"></div>
+
+        <!-- Flask server-side messages -->
+        {% if error %}
+        <div class="alert error show"><i class="fas fa-circle-exclamation"></i> {{ error }}</div>
+        {% endif %}
+        {% if success %}
+        <div class="alert success show"><i class="fas fa-circle-check"></i> {{ success }}</div>
+        {% endif %}
+
+        <!-- ==================== LOGIN FORM ==================== -->
+        <div id="panel-login" class="form-panel active">
+          <div class="space-y-5">
+
+            <div class="relative">
+              <i class="fas fa-envelope absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm"></i>
+              <input type="email" id="login-email" class="auth-input" placeholder="Email address">
+            </div>
+
+            <div class="relative">
+              <i class="fas fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm"></i>
+              <input type="password" id="login-password" class="auth-input" placeholder="Password">
+              <button type="button" class="eye-btn" onclick="togglePassword('login-password', this)">
+                <i class="fas fa-eye text-sm"></i>
+              </button>
+            </div>
+
+            <div class="flex items-center justify-between text-xs">
+              <label class="flex items-center gap-2 text-gray-400 cursor-pointer">
+                <input type="checkbox" class="accent-cyan-400 rounded"> Remember me
+              </label>
+              <button onclick="switchTab('forgot')" class="text-cyan-400 hover:text-white transition">
+                Forgot password?
+              </button>
+            </div>
+
+            <button onclick="handleLogin()"
+                    class="btn-neon w-full py-4 rounded-xl font-bold text-white uppercase tracking-widest text-sm">
+              Sign In
+            </button>
+            <!-- Hidden form for Flask POST -->
+            <form id="login-form" method="POST" action="/login" style="display:none">
+              <input type="hidden" name="email" id="login-form-email">
+              <input type="hidden" name="password" id="login-form-password">
+            </form>
+
+            <div class="divider">or</div>
+
+            <p class="text-center text-xs text-gray-500">
+              Don't have an account?
+              <button onclick="switchTab('signup')" class="text-cyan-400 hover:text-white transition font-semibold ml-1">
+                Create one
+              </button>
+            </p>
+          </div>
+        </div>
+
+        <!-- ==================== SIGNUP FORM ==================== -->
+        <div id="panel-signup" class="form-panel">
+          <div class="space-y-5">
+
+            <div class="grid grid-cols-2 gap-4">
+              <div class="relative">
+                <i class="fas fa-user absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm"></i>
+                <input type="text" id="signup-firstname" class="auth-input" placeholder="First name">
+              </div>
+              <div class="relative">
+                <i class="fas fa-user absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm"></i>
+                <input type="text" id="signup-lastname" class="auth-input" placeholder="Last name">
+              </div>
+            </div>
+
+            <div class="relative">
+              <i class="fas fa-envelope absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm"></i>
+              <input type="email" id="signup-email" class="auth-input" placeholder="Email address">
+            </div>
+
+            <div class="relative">
+              <i class="fas fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm"></i>
+              <input type="password" id="signup-password" class="auth-input" placeholder="Create password"
+                     oninput="checkStrength(this.value)">
+              <button type="button" class="eye-btn" onclick="togglePassword('signup-password', this)">
+                <i class="fas fa-eye text-sm"></i>
+              </button>
+            </div>
+
+            <!-- Password strength -->
+            <div>
+              <div class="strength-bar" id="strength-bar"></div>
+              <p id="strength-label" class="text-xs text-gray-600 mt-1"></p>
+            </div>
+
+            <div class="relative">
+              <i class="fas fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm"></i>
+              <input type="password" id="signup-confirm" class="auth-input" placeholder="Confirm password">
+              <button type="button" class="eye-btn" onclick="togglePassword('signup-confirm', this)">
+                <i class="fas fa-eye text-sm"></i>
+              </button>
+            </div>
+
+            <label class="flex items-start gap-3 text-xs text-gray-400 cursor-pointer">
+              <input type="checkbox" id="signup-terms" class="accent-cyan-400 mt-0.5 shrink-0">
+              I agree to the <span class="text-cyan-400 hover:text-white transition cursor-pointer ml-1">Terms of Service</span>
+              &nbsp;and&nbsp;
+              <span class="text-cyan-400 hover:text-white transition cursor-pointer">Privacy Policy</span>
+            </label>
+
+            <button onclick="handleSignup()"
+                    class="btn-neon w-full py-4 rounded-xl font-bold text-white uppercase tracking-widest text-sm">
+              Create Account
+            </button>
+            <form id="signup-form" method="POST" action="/signup" style="display:none">
+              <input type="hidden" name="firstname" id="signup-form-firstname">
+              <input type="hidden" name="email" id="signup-form-email">
+              <input type="hidden" name="password" id="signup-form-password">
+            </form>
+
+            <p class="text-center text-xs text-gray-500">
+              Already have an account?
+              <button onclick="switchTab('login')" class="text-cyan-400 hover:text-white transition font-semibold ml-1">
+                Sign in
+              </button>
+            </p>
+          </div>
+        </div>
+
+        <!-- ==================== FORGOT PASSWORD FORM ==================== -->
+        <div id="panel-forgot" class="form-panel">
+          <div class="space-y-5">
+
+            <div class="text-center mb-2">
+              <div class="w-14 h-14 bg-cyan-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-key text-cyan-400 text-xl"></i>
+              </div>
+              <p class="text-sm text-gray-400">Enter your email address and we'll send you a link to reset your password.</p>
+            </div>
+
+            <div class="relative">
+              <i class="fas fa-envelope absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm"></i>
+              <input type="email" id="forgot-email" class="auth-input" placeholder="Email address">
+            </div>
+
+            <button onclick="handleForgot()"
+                    class="btn-neon w-full py-4 rounded-xl font-bold text-white uppercase tracking-widest text-sm">
+              Send Reset Link
+            </button>
+            <form id="forgot-form" method="POST" action="/forgot-password" style="display:none">
+              <input type="hidden" name="email" id="forgot-form-email">
+            </form>
+
+            <p class="text-center text-xs text-gray-500">
+              Remembered your password?
+              <button onclick="switchTab('login')" class="text-cyan-400 hover:text-white transition font-semibold ml-1">
+                Back to login
+              </button>
+            </p>
+          </div>
+        </div>
+
+      </div>
+      <!-- end card -->
+
+    </div>
+  </div>
+
+  <script>
+    // ===== Tab switching =====
+    function switchTab(tab) {
+      ['login', 'signup', 'forgot'].forEach(t => {
+        document.getElementById('panel-' + t).classList.remove('active');
+        document.getElementById('tab-' + t).classList.remove('active');
+      });
+      document.getElementById('panel-' + tab).classList.add('active');
+      document.getElementById('tab-' + tab).classList.add('active');
+      clearAlert();
+    }
+
+    // ===== Alert =====
+    function showAlert(msg, type) {
+      const box = document.getElementById('alert-box');
+      box.className = `alert ${type} show`;
+      box.innerHTML = `<i class="fas fa-${type === 'error' ? 'circle-exclamation' : 'circle-check'}"></i> ${msg}`;
+    }
+    function clearAlert() {
+      const box = document.getElementById('alert-box');
+      box.className = 'alert';
+      box.innerHTML = '';
+    }
+
+    // ===== Password visibility toggle =====
+    function togglePassword(inputId, btn) {
+      const input = document.getElementById(inputId);
+      const icon = btn.querySelector('i');
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.replace('fa-eye', 'fa-eye-slash');
+      } else {
+        input.type = 'password';
+        icon.classList.replace('fa-eye-slash', 'fa-eye');
+      }
+    }
+
+    // ===== Password strength =====
+    function checkStrength(val) {
+      const bar = document.getElementById('strength-bar');
+      const label = document.getElementById('strength-label');
+      bar.className = 'strength-bar';
+      if (!val) { label.textContent = ''; return; }
+
+      let score = 0;
+      if (val.length >= 8) score++;
+      if (/[A-Z]/.test(val)) score++;
+      if (/[0-9]/.test(val)) score++;
+      if (/[^A-Za-z0-9]/.test(val)) score++;
+
+      if (score <= 1) {
+        bar.classList.add('weak');
+        label.textContent = 'Weak password';
+        label.style.color = '#ef4444';
+      } else if (score <= 3) {
+        bar.classList.add('medium');
+        label.textContent = 'Medium — add symbols or numbers';
+        label.style.color = '#f59e0b';
+      } else {
+        bar.classList.add('strong');
+        label.textContent = 'Strong password';
+        label.style.color = '#22c55e';
+      }
+    }
+
+    // ===== Login handler =====
+    function handleLogin() {
+      const email = document.getElementById('login-email').value.trim();
+      const password = document.getElementById('login-password').value;
+
+      if (!email || !password) {
+        showAlert('Please fill in all fields.', 'error'); return;
+      }
+      if (!isValidEmail(email)) {
+        showAlert('Please enter a valid email address.', 'error'); return;
+      }
+
+      // Submit to Flask
+      document.getElementById('login-form-email').value = email;
+      document.getElementById('login-form-password').value = password;
+      document.getElementById('login-form').submit();
+    }
+
+    // ===== Signup handler =====
+    function handleSignup() {
+      const first    = document.getElementById('signup-firstname').value.trim();
+      const last     = document.getElementById('signup-lastname').value.trim();
+      const email    = document.getElementById('signup-email').value.trim();
+      const password = document.getElementById('signup-password').value;
+      const confirm  = document.getElementById('signup-confirm').value;
+      const terms    = document.getElementById('signup-terms').checked;
+
+      if (!first || !last || !email || !password || !confirm) {
+        showAlert('Please fill in all fields.', 'error'); return;
+      }
+      if (!isValidEmail(email)) {
+        showAlert('Please enter a valid email address.', 'error'); return;
+      }
+      if (password.length < 6) {
+        showAlert('Password must be at least 6 characters.', 'error'); return;
+      }
+      if (password !== confirm) {
+        showAlert('Passwords do not match.', 'error'); return;
+      }
+      if (!terms) {
+        showAlert('Please accept the Terms of Service.', 'error'); return;
+      }
+
+      // Submit to Flask
+      document.getElementById('signup-form-firstname').value = first;
+      document.getElementById('signup-form-email').value = email;
+      document.getElementById('signup-form-password').value = password;
+      document.getElementById('signup-form').submit();
+    }
+
+    // ===== Forgot password handler =====
+    function handleForgot() {
+      const email = document.getElementById('forgot-email').value.trim();
+      if (!email) {
+        showAlert('Please enter your email address.', 'error'); return;
+      }
+      if (!isValidEmail(email)) {
+        showAlert('Please enter a valid email address.', 'error'); return;
+      }
+
+      // Submit to Flask
+      document.getElementById('forgot-form-email').value = email;
+      document.getElementById('forgot-form').submit();
+    }
+
+    // ===== Utility =====
+    function isValidEmail(email) {
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    }
+
+    // Allow Enter key to submit
+    document.addEventListener('keydown', function(e) {
+      if (e.key !== 'Enter') return;
+      const active = document.querySelector('.form-panel.active').id;
+      if (active === 'panel-login')  handleLogin();
+      if (active === 'panel-signup') handleSignup();
+      if (active === 'panel-forgot') handleForgot();
+    });
+  </script>
+
+</body>
+</html>

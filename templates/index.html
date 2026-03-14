@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Statify - AI Data Platform</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --neon-cyan: #00f2ff;
+      --glass: rgba(255, 255, 255, 0.03);
+      --glass-border: rgba(255, 255, 255, 0.1);
+    }
+
+    body {
+      background: radial-gradient(circle at top right, #1a1c2e, #05070a);
+      color: white;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      min-height: 100vh;
+    }
+
+    /* Modern Glass Cards */
+    .glass-card {
+      background: var(--glass);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--glass-border);
+      border-radius: 24px;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .glass-card:hover {
+      background: rgba(255, 255, 255, 0.07);
+      border-color: var(--neon-cyan);
+      transform: translateY(-10px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    }
+
+    /* Neon Button */
+    .btn-neon {
+      background: linear-gradient(90deg, #00f2ff, #0072ff);
+      box-shadow: 0 0 15px rgba(0, 242, 255, 0.3);
+      border: none;
+      transition: all 0.3s ease;
+    }
+
+    .btn-neon:hover {
+      box-shadow: 0 0 25px rgba(0, 242, 255, 0.6);
+      transform: scale(1.05);
+    }
+
+    .nav-blur {
+      background: rgba(5, 7, 10, 0.6);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--glass-border);
+    }
+
+    .team-photo {
+      border: 3px solid var(--neon-cyan);
+      box-shadow: 0 0 15px rgba(0, 242, 255, 0.2);
+    }
+  </style>
+</head>
+<body class="overflow-x-hidden">
+
+  <nav class="nav-blur sticky top-0 z-50 py-4 px-8">
+    <div class="max-w-7xl mx-auto flex justify-between items-center">
+      <a class="flex items-center gap-3" href="#">
+        <div class="w-10 h-10 border-2 border-[#00eaff] rounded-xl flex items-center justify-center font-bold text-[#00eaff] shadow-[0_0_10px_rgba(0,234,255,0.3)]">
+          S
+        </div>
+        <span class="text-2xl font-bold tracking-tight text-white">Statify</span>
+      </a>
+      <a href="/logout" class="flex items-center gap-2 text-sm text-gray-400 hover:text-cyan-400 transition border border-white/10 hover:border-cyan-400/40 px-4 py-2 rounded-full">
+        <i class="fas fa-right-from-bracket"></i> Logout
+      </a>
+    </div>
+  </nav>
+
+  <header class="relative pt-24 pb-16 px-4 text-center">
+    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-96 bg-cyan-500/10 blur-[120px] rounded-full -z-10"></div>
+    <h1 class="text-5xl md:text-7xl font-extrabold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-white via-cyan-200 to-blue-400">
+      Welcome to Statify
+    </h1>
+    <p class="max-w-2xl mx-auto text-gray-400 text-lg leading-relaxed">
+      Unlock powerful insights with advanced data visualization. Harness the strength of tailored machine learning models. Transform your datasets into smarter, data-driven decisions.
+    </p>
+  </header>
+
+  <section class="max-w-7xl mx-auto px-4 py-12">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+      
+      <div class="glass-card p-8 text-center flex flex-col items-center">
+        <div class="w-16 h-16 bg-cyan-500/10 rounded-2xl flex items-center justify-center mb-6">
+          <i class="fas fa-database text-3xl text-[#00eaff]"></i>
+        </div>
+        <h5 class="text-lg font-bold mb-3">Smart Data Analysis</h5>
+        <p class="text-sm text-gray-400">Effortless profiling, quality assessment, and intuitive cleaning suggestions.</p>
+      </div>
+
+      <div class="glass-card p-8 text-center flex flex-col items-center">
+        <div class="w-16 h-16 bg-blue-500/10 rounded-2xl flex items-center justify-center mb-6">
+          <i class="fas fa-chart-line text-3xl text-[#00bfff]"></i>
+        </div>
+        <h5 class="text-lg font-bold mb-3">Intelligent Dashboards</h5>
+        <p class="text-sm text-gray-400">Flexible visualizations for discovery, correlation, and filtering.</p>
+      </div>
+
+      <div class="glass-card p-8 text-center flex flex-col items-center">
+        <div class="w-16 h-16 bg-green-500/10 rounded-2xl flex items-center justify-center mb-6">
+          <i class="fas fa-check-circle text-3xl text-[#00ff99]"></i>
+        </div>
+        <h5 class="text-lg font-bold mb-3">Quality Assurance</h5>
+        <p class="text-sm text-gray-400">Validation highlighting missing values and statistical summaries.</p>
+      </div>
+
+      <div class="glass-card p-8 text-center flex flex-col items-center">
+        <div class="w-16 h-16 bg-purple-500/10 rounded-2xl flex items-center justify-center mb-6">
+          <i class="fas fa-sliders-h text-3xl text-[#00ff99]"></i>
+        </div>
+        <h5 class="text-lg font-bold mb-3">Flexible Preprocessing</h5>
+        <p class="text-sm text-gray-400">Customize transformation steps with an intuitive interface.</p>
+      </div>
+
+      <div class="glass-card p-8 text-center flex flex-col items-center">
+        <div class="w-16 h-16 bg-pink-500/10 rounded-2xl flex items-center justify-center mb-6">
+          <i class="fas fa-brain text-3xl text-[#c77dff]"></i>
+        </div>
+        <h5 class="text-lg font-bold mb-3">ML Models</h5>
+        <p class="text-sm text-gray-400">Easy model selection and evaluation with performance metrics.</p>
+      </div>
+
+    </div>
+  </section>
+
+  <section class="max-w-3xl mx-auto px-4 py-20 text-center">
+    <div class="glass-card p-12 border-cyan-500/20">
+      <div class="text-6xl mb-6 bg-clip-text text-transparent bg-gradient-to-t from-cyan-400 to-blue-600">
+        <i class="fas fa-cloud-upload-alt"></i>
+      </div>
+      <h2 class="text-3xl font-bold mb-4">Upload Your Dataset</h2>
+      <p class="text-gray-400 mb-8">Upload your CSV file and let our AI analyze your data and recommend models.</p>
+
+      <form action="/upload" method="post" enctype="multipart/form-data" id="uploadForm">
+        <input class="hidden" type="file" name="file" id="fileUpload" accept=".csv" required>
+        
+        <label for="fileUpload" class="btn-neon inline-block px-10 py-4 rounded-full font-bold uppercase tracking-widest cursor-pointer text-white">
+          Select CSV File
+        </label>
+        
+        <div id="fileName" class="mt-4 text-cyan-400 font-semibold" style="display:none;"></div>
+        
+        <button type="submit" class="block w-full mt-6 text-gray-400 hover:text-white transition-colors underline underline-offset-4">
+          Upload & Preview
+        </button>
+      </form>
+    </div>
+  </section>
+
+  <section class="max-w-4xl mx-auto px-4 py-20 text-center">
+    <h2 class="text-3xl font-bold mb-2">Connect with the team</h2>
+    <p class="text-gray-400 mb-12">Passionate creators behind this project.</p>
+    
+    <div class="flex justify-center gap-16">
+      <div class="group">
+        <img src="../static/photos/Maan_img.jpg" alt="MAAN GAJERA" class="team-photo w-32 h-32 rounded-full mx-auto mb-4 object-cover group-hover:scale-110 transition-transform">
+        <p class="font-bold tracking-wide">MAAN GAJERA</p>
+      </div>
+      <div class="group">
+        <img src="../static/photos/Rushi_img.jpeg" alt="RUSHI PATEL" class="team-photo w-32 h-32 rounded-full mx-auto mb-4 object-cover group-hover:scale-110 transition-transform">
+        <p class="font-bold tracking-wide">RUSHI PATEL</p>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    const fileInput = document.getElementById('fileUpload');
+    const fileNameDisplay = document.getElementById('fileName');
+
+    fileInput.addEventListener('change', function() {
+      if (fileInput.files.length > 0) {
+        fileNameDisplay.textContent = "Selected: " + fileInput.files[0].name;
+        fileNameDisplay.style.display = "block";
+      } else {
+        fileNameDisplay.style.display = "none";
+      }
+    });
+  </script>
+
+</body>
+</html>

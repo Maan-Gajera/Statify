@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Statify - Dataset Preview</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --neon-cyan: #00f2ff;
+      --glass: rgba(255, 255, 255, 0.03);
+      --glass-border: rgba(255, 255, 255, 0.1);
+    }
+
+    body {
+      background: radial-gradient(circle at top right, #1a1c2e, #05070a);
+      color: white;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      min-height: 100vh;
+    }
+
+    .glass-card {
+      background: var(--glass);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+    }
+
+    /* Navigation Pills */
+    .nav-pill {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--glass-border);
+      transition: all 0.3s ease;
+    }
+
+    .nav-pill.active {
+      border-color: var(--neon-cyan);
+      background: rgba(0, 242, 255, 0.1);
+      color: var(--neon-cyan);
+      box-shadow: 0 0 15px rgba(0, 242, 255, 0.2);
+    }
+
+    /* Table Styling */
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: var(--glass-border);
+      border-radius: 10px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: var(--neon-cyan);
+    }
+
+    input[type="number"] {
+      background: rgba(0, 0, 0, 0.2);
+      border: 1px solid var(--glass-border);
+      outline: none;
+      transition: border-color 0.3s;
+    }
+
+    input[type="number"]:focus {
+      border-color: var(--neon-cyan);
+    }
+  </style>
+</head>
+<body class="pb-12">
+
+  <header class="border-b border-white/10 bg-black/20 backdrop-blur-md sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+      <h1 class="text-xl font-bold flex items-center gap-2">
+        <i class="fas fa-layer-group text-cyan-400"></i>
+        Dataset Viewer
+      </h1>
+      <a href="/" class="text-sm text-gray-400 hover:text-cyan-400 transition">← Upload New File</a>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto mt-8 px-6">
+    
+    <div class="flex items-center gap-3 mb-8">
+      <div class="p-2 bg-blue-500/10 rounded-lg">
+        <i class="fas fa-file-csv text-blue-400"></i>
+      </div>
+      <h2 class="text-lg font-semibold text-gray-200">Dataset: <span class="text-cyan-300">{{ filename }}</span></h2>
+    </div>
+
+    <div class="flex flex-wrap justify-center gap-3 mb-10">
+      <a href="{{ url_for('dataset_preview') }}" class="nav-pill active px-6 py-2 rounded-full text-sm font-medium flex items-center gap-2">
+        <i class="fas fa-eye"></i> Overview
+      </a>
+      <a href="{{ url_for('data_quality') }}" class="nav-pill px-6 py-2 rounded-full text-sm font-medium text-gray-400 flex items-center gap-2 hover:text-white">
+        <i class="fas fa-shield-alt"></i> Data Quality
+      </a>
+      <a href="{{ url_for('preprocess') }}" class="nav-pill px-6 py-2 rounded-full text-sm font-medium text-gray-400 flex items-center gap-2 hover:text-white">
+        <i class="fas fa-tools"></i> Preprocess
+      </a>
+      <a href="{{ url_for('visualize') }}" class="nav-pill px-6 py-2 rounded-full text-sm font-medium text-gray-400 flex items-center gap-2 hover:text-white">
+        <i class="fas fa-chart-pie"></i> Visualize
+      </a>
+      <a href="{{ url_for('ml_models') }}" class="nav-pill px-6 py-2 rounded-full text-sm font-medium text-gray-400 flex items-center gap-2 hover:text-white">
+        <i class="fas fa-robot"></i> ML Models
+      </a>
+    </div>
+
+    <div class="flex flex-col lg:flex-row gap-8">
+      
+      <div class="w-full lg:w-1/4">
+        <div id="stats-box" class="hidden grid grid-cols-2 gap-4 mb-4 transition-all duration-500">
+          <div class="glass-card p-4 text-center border-cyan-500/20">
+            <div class="text-xl font-bold text-cyan-400">{{ total_rows }}</div>
+            <div class="text-[10px] uppercase text-gray-500 font-bold">Total Rows</div>
+          </div>
+          <div class="glass-card p-4 text-center border-blue-500/20">
+            <div class="text-xl font-bold text-blue-400">{{ total_columns }}</div>
+            <div class="text-[10px] uppercase text-gray-500 font-bold">Columns</div>
+          </div>
+          <div class="glass-card p-4 text-center border-red-500/20">
+            <div class="text-xl font-bold text-red-400">{{ missing_percent }}%</div>
+            <div class="text-[10px] uppercase text-gray-500 font-bold">Missing</div>
+          </div>
+          <div class="glass-card p-4 text-center border-yellow-500/20">
+            <div class="text-xl font-bold text-yellow-400">{{ duplicate_rows }}</div>
+            <div class="text-[10px] uppercase text-gray-500 font-bold">Duplicates</div>
+          </div>
+        </div>
+
+        <button onclick="toggleStats()" id="stats-toggle-btn"
+                class="w-full py-3 rounded-xl border border-white/10 hover:border-cyan-500/50 hover:bg-white/5 transition flex items-center justify-center gap-2 text-sm font-semibold">
+          Summarical Stats
+          <i id="arrow-icon" class="fas fa-chevron-down text-xs transition-transform duration-300"></i>
+        </button>
+      </div>
+
+      <div class="w-full lg:w-3/4 flex flex-col items-center">
+        <div class="glass-card w-full overflow-hidden shadow-2xl">
+          <div class="custom-scrollbar overflow-auto max-h-[550px]">
+            <table class="w-full border-collapse text-left">
+              <thead class="sticky top-0 bg-[#1a1c2e] z-10 shadow-md">
+                <tr>
+                  {% for col in column_names %}
+                  <th class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-400 border-b border-white/10">
+                    <div class="flex items-center justify-between gap-2">
+                      {{ col }}
+                      <span class="flex flex-col">
+                        <a href="{{ url_for('dataset_preview', sort_by=col, order='asc', start=start, end=end) }}" class="hover:text-cyan-400"><i class="fas fa-caret-up"></i></a>
+                        <a href="{{ url_for('dataset_preview', sort_by=col, order='desc', start=start, end=end) }}" class="hover:text-cyan-400"><i class="fas fa-caret-down"></i></a>
+                      </span>
+                    </div>
+                  </th>
+                  {% endfor %}
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-white/5 bg-white/[0.01]">
+                {% for row in row_data %}
+                <tr class="hover:bg-white/[0.03] transition">
+                  {% for col in column_names %}
+                  <td class="px-6 py-4 text-sm text-gray-300 whitespace-nowrap">{{ row[col] }}</td>
+                  {% endfor %}
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <form action="{{ url_for('dataset_preview') }}" method="get" class="mt-8 flex items-center gap-4 bg-black/30 p-2 rounded-full border border-white/5">
+          <div class="flex items-center px-4 gap-2">
+            <span class="text-xs text-gray-500 font-bold uppercase">Range</span>
+            <input type="number" name="start" value="{{ start }}" class="w-16 py-1 rounded-md text-center text-sm" required>
+            <span class="text-gray-600">to</span>
+            <input type="number" name="end" value="{{ end }}" class="w-16 py-1 rounded-md text-center text-sm" required>
+          </div>
+          <button type="submit" class="bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold uppercase px-6 py-2 rounded-full transition shadow-lg shadow-cyan-900/20">
+            Load Data
+          </button>
+        </form>
+      </div>
+
+    </div>
+  </main>
+
+  <script>
+    function toggleStats() {
+      const statsBox = document.getElementById("stats-box");
+      const arrowIcon = document.getElementById("arrow-icon");
+      if (statsBox.classList.contains("hidden")) {
+        statsBox.classList.remove("hidden");
+        arrowIcon.classList.add("rotate-180");
+      } else {
+        statsBox.classList.add("hidden");
+        arrowIcon.classList.remove("rotate-180");
+      }
+    }
+  </script>
+</body>
+</html>

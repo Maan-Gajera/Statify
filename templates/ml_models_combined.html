@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Statify - ML Intelligence</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --neon-cyan: #00f2ff;
+      --glass: rgba(255, 255, 255, 0.03);
+      --glass-border: rgba(255, 255, 255, 0.1);
+    }
+
+    body {
+      background: radial-gradient(circle at top right, #1a1c2e, #05070a);
+      color: white;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      min-height: 100vh;
+    }
+
+    .glass-card {
+      background: var(--glass);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--glass-border);
+      border-radius: 24px;
+    }
+
+    .nav-pill {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--glass-border);
+      transition: all 0.3s ease;
+    }
+
+    .nav-pill.active {
+      border-color: var(--neon-cyan);
+      background: rgba(0, 242, 255, 0.1);
+      color: var(--neon-cyan);
+      box-shadow: 0 0 15px rgba(0, 242, 255, 0.2);
+    }
+
+    select, input {
+      background-color: #0f172a !important;
+      border: 1px solid var(--glass-border) !important;
+      color: white !important;
+      outline: none !important;
+    }
+
+    select:focus, input:focus {
+      border-color: var(--neon-cyan) !important;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: var(--glass-border);
+      border-radius: 10px;
+    }
+  </style>
+</head>
+<body class="pb-12">
+
+  <header class="border-b border-white/10 bg-black/20 backdrop-blur-md sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+      <h1 class="text-xl font-bold flex items-center gap-3">
+        <i class="fas fa-brain text-purple-400"></i>
+        ML Intelligence
+      </h1>
+      <a href="/" class="text-sm text-gray-400 hover:text-cyan-400 transition">← Upload New File</a>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto mt-8 px-6">
+    
+    {% if error_message %}
+    <div class="glass-card border-red-500/50 bg-red-500/10 px-6 py-4 rounded-xl mb-8 flex items-center gap-3 text-red-200">
+      <i class="fas fa-circle-exclamation"></i>
+      {{ error_message }}
+    </div>
+    {% endif %}
+
+    <div class="flex items-center gap-3 mb-8">
+      <div class="p-2 bg-purple-500/10 rounded-lg">
+        <i class="fas fa-microchip text-purple-400"></i>
+      </div>
+      <h2 class="text-lg font-semibold text-gray-200">Modeling: <span class="text-cyan-300">{{ filename }}</span></h2>
+    </div>
+
+    <div class="flex flex-wrap justify-center gap-3 mb-10">
+      <a href="{{ url_for('dataset_preview') }}" class="nav-pill px-6 py-2 rounded-full text-sm font-medium text-gray-400 flex items-center gap-2 hover:text-white">
+        <i class="fas fa-eye"></i> Overview
+      </a>
+      <a href="{{ url_for('data_quality') }}" class="nav-pill px-6 py-2 rounded-full text-sm font-medium text-gray-400 flex items-center gap-2 hover:text-white">
+        <i class="fas fa-shield-alt"></i> Data Quality
+      </a>
+      <a href="{{ url_for('preprocess') }}" class="nav-pill px-6 py-2 rounded-full text-sm font-medium text-gray-400 flex items-center gap-2 hover:text-white">
+        <i class="fas fa-tools"></i> Preprocess
+      </a>
+      <a href="{{ url_for('visualize') }}" class="nav-pill px-6 py-2 rounded-full text-sm font-medium text-gray-400 flex items-center gap-2 hover:text-white">
+        <i class="fas fa-chart-pie"></i> Visualize
+      </a>
+      <a href="{{ url_for('ml_models') }}" class="nav-pill active px-6 py-2 rounded-full text-sm font-medium flex items-center gap-2">
+        <i class="fas fa-robot"></i> ML Models
+      </a>
+    </div>
+
+    <div class="max-w-4xl mx-auto space-y-8">
+      
+      <section class="glass-card p-8 border-white/5">
+        <h3 class="text-sm font-bold text-cyan-400 uppercase tracking-widest mb-6">Model Configuration</h3>
+        <form method="post" action="{{ url_for('ml_models') }}" class="space-y-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Target Feature</label>
+              <select name="target" class="w-full p-4 rounded-xl text-sm" required>
+                {% for col in columns %}
+                  <option value="{{ col }}" {% if col == selected_target %}selected{% endif %}>{{ col }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Input Features (Ctrl+Click)</label>
+              <select name="features" multiple required class="w-full p-4 rounded-xl text-sm h-32 custom-scrollbar">
+                {% for col in columns %}
+                  <option value="{{ col }}">{{ col }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+          <button type="submit" class="w-full py-4 bg-cyan-600 hover:bg-cyan-500 rounded-xl font-bold tracking-wide transition shadow-lg shadow-cyan-900/20">
+            Train Models
+          </button>
+        </form>
+      </section>
+
+      {% if results and features %}
+      <section class="glass-card p-8 border-cyan-500/10">
+        <h3 class="text-sm font-bold text-gray-300 uppercase tracking-widest mb-6">Performance Matrix: <span class="text-cyan-400">{{ selected_target }}</span></h3>
+        <div class="overflow-x-auto custom-scrollbar">
+          <table class="w-full text-left">
+            <thead>
+              <tr class="bg-black/20">
+                <th class="px-6 py-4 text-xs font-bold uppercase text-gray-500 border-b border-white/5">Algorithm</th>
+                <th class="px-6 py-4 text-xs font-bold uppercase text-gray-500 border-b border-white/5">Score / Metrics</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-white/5">
+              {% for r in results %}
+              <tr class="hover:bg-white/[0.02] transition">
+                <td class="px-6 py-4 font-bold text-sm">{{ r.model }}</td>
+                <td class="px-6 py-4 text-sm text-gray-400">
+                  {% if is_classification %}
+                    <span class="text-green-400 font-mono">Accuracy: {{ r.accuracy }}</span>
+                  {% else %}
+                    <span class="text-cyan-400 font-mono">R2: {{ r.r2 }}</span> | MAE: {{ r.mae }} | RMSE: {{ r.rmse }}
+                  {% endif %}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      {% if not is_classification %}
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="glass-card p-6 border-white/5 group relative">
+          <h4 class="text-xs font-bold uppercase text-gray-500 mb-4">Model Comparison</h4>
+          <img src="{{ url_for('static', filename='plots/model_comparison.png') }}"
+               class="rounded-xl shadow-2xl w-full cursor-zoom-in hover:opacity-90 transition-opacity"
+               onclick="openModal(this.src)">
+          <div class="absolute bottom-4 right-6 text-[10px] text-gray-500 font-bold uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">Click to expand</div>
+        </div>
+        <div class="glass-card p-6 border-white/5 group relative">
+          <h4 class="text-xs font-bold uppercase text-gray-500 mb-4">Feature Weighting</h4>
+          <img src="{{ url_for('static', filename='plots/feature_importance.png') }}"
+               class="rounded-xl shadow-2xl w-full cursor-zoom-in hover:opacity-90 transition-opacity"
+               onclick="openModal(this.src)">
+          <div class="absolute bottom-4 right-6 text-[10px] text-gray-500 font-bold uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">Click to expand</div>
+        </div>
+      </div>
+      {% endif %}
+
+      <section class="glass-card p-8 border-green-500/10">
+        <h3 class="text-sm font-bold text-green-400 uppercase tracking-widest mb-6">Make Prediction</h3>
+        <form method="post" action="{{ url_for('ml_predict') }}" class="space-y-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="md:col-span-2">
+              <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Select Active Model</label>
+              <select name="model_name" class="w-full p-4 rounded-xl text-sm" required>
+                {% for r in results %}
+                  <option value="{{ r.model }}">{{ r.model }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            {% for col in original_feature_cols %}
+            <div>
+              <label class="block text-xs font-bold text-gray-500 uppercase mb-2">{{ col }}</label>
+              {% if col in cat_unique_values %}
+                <select name="{{ col }}" required class="w-full p-4 rounded-xl text-sm">
+                  <option value="" disabled selected>Select {{ col }}...</option>
+                  {% for val in cat_unique_values[col] %}
+                    <option value="{{ val }}">{{ val }}</option>
+                  {% endfor %}
+                </select>
+              {% else %}
+                <input type="number" step="any" name="{{ col }}" placeholder="Enter {{ col }}..." required class="w-full p-4 rounded-xl text-sm">
+              {% endif %}
+            </div>
+            {% endfor %}
+          </div>
+          <button type="submit" class="w-full py-4 bg-green-600 hover:bg-green-500 rounded-xl font-bold tracking-wide transition shadow-lg shadow-green-900/20">
+            Generate Prediction
+          </button>
+        </form>
+      </section>
+
+      {% if prediction is defined and prediction is not none %}
+      <div class="glass-card p-8 border-white/10 bg-gradient-to-br from-cyan-500/5 to-green-500/5">
+        <div class="flex items-center gap-6">
+          <div class="w-20 h-20 rounded-full bg-green-500/10 flex items-center justify-center text-4xl text-green-400">
+            <i class="fas fa-bolt"></i>
+          </div>
+          <div>
+            <p class="text-[10px] uppercase font-bold text-gray-500 tracking-widest mb-1">Prediction Outcome</p>
+            <h3 class="text-3xl font-extrabold text-white">{{ prediction }}</h3>
+            <p class="text-xs text-gray-400 mt-2">Model used: <span class="text-cyan-400">{{ model_name }}</span></p>
+          </div>
+        </div>
+        
+        <div class="mt-6 pt-6 border-t border-white/5">
+          <span class="text-xs font-bold text-gray-500 uppercase">Input Context:</span>
+          <div class="grid grid-cols-2 gap-2 mt-2">
+             {% for f, v in zip(original_feature_cols, input_vector) %}
+               <div class="text-xs text-gray-400"><span class="text-white">{{ f }}:</span> {{ v }}</div>
+             {% endfor %}
+          </div>
+        </div>
+        
+        <a href="{{ url_for('ml_models') }}" class="inline-block mt-8 text-xs text-cyan-400 underline underline-offset-4 hover:text-white transition">Try another configuration</a>
+      </div>
+      {% endif %}
+      {% endif %}
+    </div>
+  </main>
+  <!-- Image Modal -->
+  <div id="img-modal" class="fixed inset-0 z-[100] hidden bg-black/95 backdrop-blur-xl flex items-center justify-center p-8">
+    <button onclick="closeModal()"
+            class="absolute top-6 right-6 z-[110] text-gray-400 hover:text-white bg-white/5 hover:bg-white/10 rounded-full w-12 h-12 flex items-center justify-center text-2xl font-bold transition-all">
+      &times;
+    </button>
+    <img id="modal-img" src="" class="max-w-full max-h-full object-contain rounded-xl shadow-2xl cursor-zoom-out" onclick="closeModal()">
+  </div>
+
+  <script>
+    function openModal(src) {
+      document.getElementById('modal-img').src = src;
+      document.getElementById('img-modal').classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+      document.getElementById('img-modal').classList.add('hidden');
+      document.body.style.overflow = 'auto';
+    }
+
+    // Close on backdrop click or Escape key
+    document.getElementById('img-modal').addEventListener('click', function(e) {
+      if (e.target.id === 'img-modal') closeModal();
+    });
+
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') closeModal();
+    });
+  </script>
+
+</body>
+</html>

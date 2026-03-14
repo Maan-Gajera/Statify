@@ -1,0 +1,5 @@
+.env
+statify.db
+__pycache__/
+uploads/
+static/plots/

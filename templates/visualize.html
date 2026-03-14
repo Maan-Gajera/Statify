@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Statify - Visual Intelligence</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --neon-cyan: #00f2ff;
+      --glass: rgba(255, 255, 255, 0.03);
+      --glass-border: rgba(255, 255, 255, 0.1);
+    }
+
+    body {
+      background: radial-gradient(circle at top right, #1a1c2e, #05070a);
+      color: white;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      min-height: 100vh;
+    }
+
+    .glass-card {
+      background: var(--glass);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--glass-border);
+      border-radius: 24px;
+    }
+
+    .nav-pill {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--glass-border);
+      transition: all 0.3s ease;
+    }
+
+    .nav-pill.active {
+      border-color: var(--neon-cyan);
+      background: rgba(0, 242, 255, 0.1);
+      color: var(--neon-cyan);
+      box-shadow: 0 0 15px rgba(0, 242, 255, 0.2);
+    }
+
+    /* Sidebar Button Active State */
+    .chart-btn.active {
+      background: rgba(0, 242, 255, 0.1);
+      border-left: 4px solid var(--neon-cyan);
+      box-shadow: inset 10px 0 20px -10px rgba(0, 242, 255, 0.3);
+    }
+
+    select {
+      background-color: #0f172a;
+      border: 1px solid var(--glass-border) !important;
+      color: white !important;
+      outline: none !important;
+    }
+
+    select:focus {
+      border-color: var(--neon-cyan) !important;
+    }
+
+    #chart-image {
+      filter: drop-shadow(0 0 15px rgba(0, 242, 255, 0.1));
+      transition: transform 0.3s ease;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 5px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: var(--glass-border);
+      border-radius: 10px;
+    }
+  </style>
+</head>
+<body class="pb-12">
+  
+  <div id="column-metadata"
+     data-numeric='{{ numeric_cols | tojson }}'
+     data-categorical='{{ cat_cols | tojson }}'
+     style="display:none;"></div>
+
+  <header class="border-b border-white/10 bg-black/20 backdrop-blur-md sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+      <h1 class="text-xl font-bold flex items-center gap-3">
+        <i class="fas fa-chart-line text-cyan-400"></i>
+        Visual Intelligence
+      </h1>
+      <a href="/" class="text-sm text-gray-400 hover:text-cyan-400 transition">← Upload New File</a>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto mt-8 px-6">
+    
+    <div class="flex items-center gap-3 mb-8">
+      <div class="p-2 bg-blue-500/10 rounded-lg">
+        <i class="fas fa-chart-area text-blue-400"></i>
+      </div>
+      <h2 class="text-lg font-semibold text-gray-200">Exploring: <span class="text-cyan-300">{{ filename }}</span></h2>
+    </div>
+
+    <div class="flex flex-wrap justify-center gap-3 mb-10">
+      <a href="{{ url_for('dataset_preview') }}" class="nav-pill px-6 py-2 rounded-full text-sm font-medium text-gray-400 flex items-center gap-2 hover:text-white">
+        <i class="fas fa-eye"></i> Overview
+      </a>
+      <a href="{{ url_for('data_quality') }}" class="nav-pill px-6 py-2 rounded-full text-sm font-medium text-gray-400 flex items-center gap-2 hover:text-white">
+        <i class="fas fa-shield-alt"></i> Data Quality
+      </a>
+      <a href="{{ url_for('preprocess') }}" class="nav-pill px-6 py-2 rounded-full text-sm font-medium text-gray-400 flex items-center gap-2 hover:text-white">
+        <i class="fas fa-tools"></i> Preprocess
+      </a>
+      <a href="{{ url_for('visualize') }}" class="nav-pill active px-6 py-2 rounded-full text-sm font-medium flex items-center gap-2">
+        <i class="fas fa-chart-pie"></i> Visualize
+      </a>
+      <a href="{{ url_for('ml_models') }}" class="nav-pill px-6 py-2 rounded-full text-sm font-medium text-gray-400 flex items-center gap-2 hover:text-white">
+        <i class="fas fa-robot"></i> ML Models
+      </a>
+    </div>
+
+    <div class="flex flex-col lg:flex-row gap-8">
+        
+        <div class="w-full lg:w-1/4 glass-card p-6 h-fit border-white/5">
+            <h3 class="text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-6">Select Graph Engine</h3>
+            <div class="space-y-3">
+                {% for chart in ['histogram','bar','scatter','box','heatmap','pie'] %}
+                <button type="button" class="chart-btn w-full text-left p-4 rounded-xl border border-white/5 bg-white/[0.02] hover:bg-white/[0.05] transition-all flex items-center gap-4 group" data-chart="{{ chart }}">
+                    <div class="w-10 h-10 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-400 group-hover:scale-110 transition-transform">
+                        <i class="fas fa-chart-{{ 'pie' if chart == 'pie' else 'bar' }}"></i>
+                    </div>
+                    <span class="font-bold text-sm tracking-wide">{{ chart.replace('_',' ').title() }}</span>
+                </button>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="w-full lg:w-3/4 flex flex-col gap-6">
+            
+            <form id="visualization-form" method="POST" class="glass-card p-6 flex flex-wrap lg:flex-nowrap items-end gap-4 border-cyan-500/10">
+                <input type="hidden" name="chart_type" id="chart-type-input" value="{{ selected_chart_type or 'bar' }}">
+                
+                <div class="flex-1 min-w-[150px]" id="x-wrapper">
+                    <label class="block text-[10px] uppercase font-bold text-gray-500 mb-2">X-Axis</label>
+                    <select name="x_axis" id="x-axis-select" class="w-full p-3 rounded-xl text-sm"></select>
+                </div>
+
+                <div class="flex-1 min-w-[150px]" id="y-wrapper">
+                    <label class="block text-[10px] uppercase font-bold text-gray-500 mb-2">Y-Axis</label>
+                    <select name="y_axis" id="y-axis-select" class="w-full p-3 rounded-xl text-sm"></select>
+                </div>
+
+                <div class="flex-1 min-w-[150px]" id="z-wrapper" style="display:none;">
+                    <label class="block text-[10px] uppercase font-bold text-gray-500 mb-2">Z-Axis (Value)</label>
+                    <select name="z_axis" id="z-axis-select" class="w-full p-3 rounded-xl text-sm"></select>
+                </div>
+
+                <button type="submit" class="bg-cyan-600 px-8 py-3 rounded-xl hover:bg-cyan-500 transition font-bold text-sm shadow-lg shadow-cyan-900/20">
+                    Generate
+                </button>
+            </form>
+
+            <div class="glass-card w-full h-[550px] flex flex-col items-center justify-center bg-black/20 p-6 relative group overflow-hidden border-white/5">
+                {% if plot_filename %}
+                <img src="{{ url_for('static', filename='plots/' + plot_filename) }}" 
+                    id="chart-image"
+                    class="max-w-full max-h-full object-contain cursor-zoom-in rounded-lg shadow-2xl"
+                    onclick="openModal(this.src)">
+                <div class="absolute bottom-4 right-6 text-[10px] text-gray-500 font-bold uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">
+                    Click to expand view
+                </div>
+                {% else %}
+                    <div class="text-center">
+                        <div class="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <i class="fas fa-chart-area text-4xl text-gray-700"></i>
+                        </div>
+                        <h4 class="text-gray-400 font-semibold">Parameters Required</h4>
+                        <p class="text-xs text-gray-600 max-w-xs mt-2">Select a chart type and axes above to render the visualization portal.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+  </main>
+
+  <div id="image-modal" class="fixed inset-0 z-[100] hidden bg-black/95 backdrop-blur-xl flex items-center justify-center p-8">
+    <button id="close-modal" class="absolute top-8 right-8 z-[110] text-gray-400 hover:text-white bg-white/5 hover:bg-white/10 rounded-full w-14 h-14 flex items-center justify-center text-4xl transition-all">
+        &times;
+    </button>
+    <img id="modal-img" src="" class="max-w-full max-h-full object-contain rounded-xl shadow-2xl cursor-zoom-out" onclick="closeModal()">
+  </div>
+
+  <script>
+    // Logic exactly as provided in original visualize.html
+    document.addEventListener('DOMContentLoaded', () => {
+        const meta = document.getElementById('column-metadata');
+        const numeric = JSON.parse(meta.dataset.numeric);
+        const categorical = JSON.parse(meta.dataset.categorical);
+        
+        const chartButtons = document.querySelectorAll('.chart-btn');
+        const chartTypeInput = document.getElementById('chart-type-input');
+
+        function fillOptions(id, list) {
+            const select = document.getElementById(id);
+            if (!list || list.length === 0) {
+                select.innerHTML = '<option value="">None</option>';
+            } else {
+                select.innerHTML = list.map(c => `<option value="${c}">${c}</option>`).join('');
+            }
+        }
+
+        function updateUI(type) {
+            const rules = {
+                histogram: { x: numeric, y: [], z: [] },
+                bar:       { x: categorical, y: numeric, z: [] },
+                scatter:   { x: numeric, y: numeric, z: [] },
+                box:       { x: categorical, y: numeric, z: [] },
+                heatmap:   { x: categorical, y: categorical, z: numeric },
+                pie:       { x: categorical, y: numeric, z: [] }
+            };
+
+            const rule = rules[type];
+            fillOptions('x-axis-select', rule.x);
+            fillOptions('y-axis-select', rule.y);
+            fillOptions('z-axis-select', rule.z);
+
+            document.getElementById('y-wrapper').style.display = rule.y.length ? 'block' : 'none';
+            document.getElementById('z-wrapper').style.display = rule.z.length ? 'block' : 'none';
+
+            chartButtons.forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.chart === type) btn.classList.add('active');
+            });
+            
+            chartTypeInput.value = type;
+        }
+
+        chartButtons.forEach(button => {
+            button.addEventListener('click', () => updateUI(button.dataset.chart));
+        });
+
+        const initialType = chartTypeInput.value || 'bar';
+        updateUI(initialType);
+    });
+
+    function openModal(src) {
+        const modal = document.getElementById('image-modal');
+        const modalImg = document.getElementById('modal-img');
+        if (modal && modalImg) {
+            modal.classList.remove('hidden');
+            modalImg.src = src;
+            document.body.style.overflow = 'hidden';
+        }
+    }
+
+    function closeModal() {
+        const modal = document.getElementById('image-modal');
+        if (modal) {
+            modal.classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const closeBtn = document.getElementById('close-modal');
+        const modalOverlay = document.getElementById('image-modal');
+        if (closeBtn) closeBtn.onclick = (e) => { e.stopPropagation(); closeModal(); };
+        if (modalOverlay) modalOverlay.onclick = (e) => { if (e.target.id === 'image-modal') closeModal(); };
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+    });
+  </script>
+</body>
+</html>
