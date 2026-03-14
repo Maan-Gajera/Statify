@@ -1,7 +1,9 @@
 flask
 pandas
 numpy
-openai
-plotly
+scikit-learn
 matplotlib
+seaborn
+werkzeug
+python-dotenv
 gunicorn
