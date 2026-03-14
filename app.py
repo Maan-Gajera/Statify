@@ -112,7 +112,7 @@ def signup():
         return render_template('login.html', error=err, active_tab='signup')
 
 
-@app.route('/forgot-password', methods=['POST'])
+@app.route('/forgot-password', methods=['GET','POST'])
 def forgot_password():
     email = request.form.get('email', '').strip()
 
