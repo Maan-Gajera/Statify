@@ -274,12 +274,20 @@ def send_reset_email(to_email: str, token: str, base_url: str) -> bool:
         print(f"\n[DEV MODE] Password reset link for {to_email}:\n{reset_link}\n")
         return True
 
+    mail_use_tls = os.environ.get("MAIL_USE_TLS", "False").lower() == "true"
+
     try:
-        with smtplib.SMTP(mail_server, mail_port) as server:
-            server.ehlo()
-            server.starttls()
-            server.login(mail_username, mail_password)
-            server.sendmail(mail_from, to_email, msg.as_string())
+        if mail_use_tls:
+            with smtplib.SMTP_SSL(mail_server, mail_port) as server:
+                server.ehlo()
+                server.login(mail_username, mail_password)
+                server.sendmail(mail_from, to_email, msg.as_string())
+        else:
+            with smtplib.SMTP(mail_server, mail_port) as server:
+                server.ehlo()
+                server.starttls()
+                server.login(mail_username, mail_password)
+                server.sendmail(mail_from, to_email, msg.as_string())
         return True
     except Exception as e:
         print(f"[EMAIL ERROR] {e}")

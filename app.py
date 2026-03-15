@@ -114,6 +114,9 @@ def signup():
 
 @app.route('/forgot-password', methods=['GET','POST'])
 def forgot_password():
+    if request.method == 'GET':
+        return render_template('login.html', active_tab='forgot')
+
     email = request.form.get('email', '').strip()
 
     if not email:
