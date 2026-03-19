@@ -117,7 +117,7 @@
             <div>
               <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Target Feature</label>
               <select name="target" class="w-full p-4 rounded-xl text-sm" required>
-                {% for col in columns %}
+                {% for col in numeric_columns %}
                   <option value="{{ col }}" {% if col == selected_target %}selected{% endif %}>{{ col }}</option>
                 {% endfor %}
               </select>
@@ -208,7 +208,7 @@
                   {% endfor %}
                 </select>
               {% else %}
-                <input type="number" step="any" name="{{ col }}" placeholder="Enter {{ col }}..." required class="w-full p-4 rounded-xl text-sm">
+                <input type="text" step="any" name="{{ col }}" placeholder="Enter {{ col }}..." required class="w-full p-4 rounded-xl text-sm">
               {% endif %}
             </div>
             {% endfor %}

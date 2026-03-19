@@ -67,6 +67,23 @@ def read_rows_from_csv(filepath, start, end):
 
 
 # ─────────────────────────────────────────────
+# Helper: coerce numeric-looking string columns
+# ─────────────────────────────────────────────
+
+def coerce_df(df):
+    """Strip $/, commas from string columns and convert to numeric where possible."""
+    df = df.copy()
+    df.columns = df.columns.str.strip()
+    for col in df.columns:
+        if df[col].dtype == object:
+            cleaned = df[col].astype(str).str.replace(r'[$,\s]', '', regex=True)
+            converted = pd.to_numeric(cleaned, errors='coerce')
+            if converted.notna().sum() > len(df) * 0.5:
+                df[col] = converted
+    return df
+
+
+# ─────────────────────────────────────────────
 # Auth routes
 # ─────────────────────────────────────────────
 
@@ -377,7 +394,7 @@ def train_supervised_models(df, target_col, feature_cols):
 
     cat_unique_values = {}
     for col in X.columns:
-        if X[col].dtype == 'object':
+        if not pd.api.types.is_numeric_dtype(X[col]):
             cat_unique_values[col] = X[col].dropna().unique().tolist()
 
     X = pd.get_dummies(X)
@@ -452,9 +469,9 @@ def ml_models():
     if not filepath or not os.path.exists(filepath):
         return redirect(url_for('index'))
 
-    df = pd.read_csv(filepath)
-    df.columns = df.columns.str.strip()
+    df = coerce_df(pd.read_csv(filepath))
     columns = df.columns.tolist()
+    numeric_columns = df.select_dtypes(include='number').columns.tolist()
 
     if request.method == 'POST':
         target_col   = request.form.get('target')
@@ -472,7 +489,8 @@ def ml_models():
 
         if not pd.api.types.is_numeric_dtype(df[target_col]):
             return render_template('ml_models_combined.html',
-                                   columns=columns, selected_target=target_col,
+                                   columns=columns, numeric_columns=numeric_columns,
+                                   selected_target=target_col,
                                    results=None, features=None,
                                    error_message="Selected target column must be numeric for regression.",
                                    filename=os.path.basename(filepath))
@@ -482,7 +500,8 @@ def ml_models():
         session['feature_cols']      = feature_cols
 
         return render_template('ml_models_combined.html',
-                               columns=columns, selected_target=target_col,
+                               columns=columns, numeric_columns=numeric_columns,
+                               selected_target=target_col,
                                results=results, features=features,
                                cat_unique_values=cat_unique_values,
                                original_feature_cols=feature_cols,
@@ -491,7 +510,8 @@ def ml_models():
                                zip=zip, filename=os.path.basename(filepath))
 
     return render_template('ml_models_combined.html',
-                           columns=columns, selected_target=None,
+                           columns=columns, numeric_columns=numeric_columns,
+                           selected_target=None,
                            results=None, features=None,
                            cat_unique_values={}, original_feature_cols=[],
                            is_classification=None,
@@ -507,15 +527,20 @@ def ml_predict():
     if not filepath or not os.path.exists(filepath):
         return redirect(url_for('index'))
 
-    df         = pd.read_csv(filepath)
+    df         = coerce_df(pd.read_csv(filepath))
     model_name = request.form.get('model_name')
 
     if model_name not in trained_models:
         return "Model not found."
 
     model, trained_columns, scaler = trained_models[model_name]
-    feature_cols       = session.get('feature_cols', [])
-    cat_unique_values  = session.get('cat_unique_values', {})
+    feature_cols      = session.get('feature_cols', [])
+
+    # Rebuild cat_unique_values fresh from coerced CSV
+    cat_unique_values = {}
+    for col in feature_cols:
+        if col in df.columns and not pd.api.types.is_numeric_dtype(df[col]):
+            cat_unique_values[col] = df[col].dropna().unique().tolist()
 
     raw_input     = {}
     display_input = {}
@@ -542,10 +567,12 @@ def ml_predict():
         prediction = round(float(prediction), 2)
 
     results, features, cat_unique_values_fresh = train_supervised_models(df, target_col, feature_cols)
+    numeric_columns = df.select_dtypes(include='number').columns.tolist()
 
     return render_template("ml_models_combined.html",
                            filename=os.path.basename(filepath),
                            columns=list(df.columns),
+                           numeric_columns=numeric_columns,
                            results=results, features=features,
                            cat_unique_values=cat_unique_values_fresh,
                            original_feature_cols=feature_cols,
